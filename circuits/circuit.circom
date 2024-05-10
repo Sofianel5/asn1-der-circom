@@ -22,6 +22,7 @@ function readUint16(data, index) {
 
 function readBytes(data, index, length) {
     // TODO
+    return 0;
 }
 
 function packNode(length, start, end) {
@@ -40,7 +41,7 @@ function getStart(node) {
 }
 
 function getEnd(node) {
-    return uin80(node >> 160);
+    return uint80(node >> 160);
 }
 
 template ReadNodeLength(maxLength) {
@@ -48,6 +49,7 @@ template ReadNodeLength(maxLength) {
     signal input index;
 
     signal output node;
+    signal output node2;
 
     var length;
     var start;
@@ -58,7 +60,7 @@ template ReadNodeLength(maxLength) {
         start = uint80(index + 2);
         end = uint80(start + length - 1);
     } else {
-        var lengthOfLengthSection = uint8(derBytes[index + 1] & 0x7f)
+        var lengthOfLengthSection = uint8(derBytes[index + 1] & 0x7f);
         if (lengthOfLengthSection == 1) {
             length = readUint8(derBytes, index + 2);
         } else if (lengthOfLengthSection == 2) {
@@ -75,11 +77,11 @@ template ReadNodeLength(maxLength) {
 
 template Root(maxLength) {
     signal input derBytes[maxLength];
-    signal output outputNode[maxLength];
+    signal output outputNode;
 
     component readNodeLength = ReadNodeLength(maxLength);
 
-    for (i = 0; i < maxLength; i++) {
+    for (var i = 0; i < maxLength; i++) {
         readNodeLength.derBytes[i] <== derBytes[i];
     }
 
@@ -100,7 +102,7 @@ template FirstChildOf(maxLength) {
 
     component readNodeLength = ReadNodeLength(maxLength);
 
-    for (i = 0; i < maxLength; i++) {
+    for (var i = 0; i < maxLength; i++) {
         readNodeLength.derBytes[i] <== derBytes[i];
     }
 
@@ -117,7 +119,7 @@ template NextSiblingOf(maxLength) {
 
     component readNodeLength = ReadNodeLength(maxLength);
 
-    for (i = 0; i < maxLength; i++) {
+    for (var i = 0; i < maxLength; i++) {
         readNodeLength.derBytes[i] <== derBytes[i];
     }
 
@@ -134,11 +136,20 @@ template GetBytesOf(maxLength) {
 
     var out = readBytes(derBytes, getStart(node), getEnd(node));
 
-    for (i = 0; i < maxLength; i ++) {
-        outputBytes[i] 
+    for (var i = 0; i < maxLength; i ++) {
+        // outputBytes[i] 
     }
 }
 
 template X509Verify(maxLength) {
+    signal input cert[maxLength];
+    signal input signer;
+
+    component root = Root(maxLength);
+    for (var i = 0; i < maxLength; i++) {
+        root.derBytes[i] <== cert[i];
+    }
 
 }
+
+component main = X509Verify(1000);
