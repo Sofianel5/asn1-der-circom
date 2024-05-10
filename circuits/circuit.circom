@@ -49,7 +49,6 @@ template ReadNodeLength(maxLength) {
     signal input index;
 
     signal output node;
-    signal output node2;
 
     var length;
     var start;
